@@ -13,24 +13,24 @@ Requires the [gdrive](https://github.com/prasmussen/gdrive) command line utility
 1. Download the [gdrive](https://github.com/prasmussen/gdrive)  utility from its GitHub page and follow its installation guide.
 2. Clone this repository
 3. Make the `db-dump.sh` script executable, and link it somewhere it can be called from any directory e.g:
-```sh
-$ chmod +x /path/to/db-dump.sh
-$ sudo ln -s /path/to/db-dump.sh /usr/local/bin/db-dump
-```
+	```sh
+	$ chmod +x /path/to/db-dump.sh
+	$ sudo ln -s /path/to/db-dump.sh /usr/local/bin/db-dump
+	```
 4. Set up your `db-dump.conf` file, either manually by copying `db-dump.conf.dist`, or by typing `db-dump config` at the command line:
-```sh
-$ db-dump config
-Generating config file...
-Enter Database Name: mydatabase    
-Enter Google Drive Folder ID: abc123def456
-Config file generated.
-```
+	```sh
+	$ db-dump config
+	Generating config file...
+	Enter Database Name: mydatabase    
+	Enter Google Drive Folder ID: abc123def456
+	Config file generated.
+	```
 5. Run the script
-```sh
-$ db-dump
-Uploading /var/spool/db-dump/mydatabase-2016-11-09_17:09:51.sql
-Uploaded 0BwvPrE-VPdlkb7BhLGVJZUxST1z at 356.8 KB/s, total 683.5 KB
-```
+	```sh
+	$ db-dump
+	Uploading /var/spool/db-dump/mydatabase-2016-11-09_17:09:51.sql
+	Uploaded 0BwvPrE-VPdlkb7BhLGVJZUxST1z at 356.8 KB/s, total 683.5 KB
+	```
 
 ## Configuration
 
