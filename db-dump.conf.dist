@@ -1,0 +1,14 @@
+# The name of the database we're going to backup.
+dbname=""
+
+# The Google Drive folder ID where database exports will be uploaded to
+gdrivefolderid=""
+
+# The local directory where we'll be storing database exports
+dumpdir="/var/spool/db-dump"
+
+# Date format for dates appended to export files
+dateformat="%Y-%m-%d_%H:%M:%S"
+
+# Number of days to retain backups
+retentiondays=14

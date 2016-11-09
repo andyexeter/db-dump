@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# Exports a database to a file and uploads it to Google Drive.
+
+# Bail out if there are any errors.
+set -e
+
+dir=$(dirname `readlink -f $0`)
+
+# Ensure the gdrive utility is installed
+command -v gdrive >/dev/null 2>&1 || { echo >&2 "gdrive (https://github.com/prasmussen/gdrive) command line utility is required but not installed. Aborting."; exit 1; }
+
+# Ensure we have a conf file
+if ! [ -f "$dir/db-dump.conf" ]; then
+	echo "Config file doesn't appear to exist..."
+	read -p "Enter Database Name: " userdbname
+	read -p "Enter Google Drive Folder ID: " usergoogledrivefolderid
+
+	echo "Generating config file..."
+
+	cp "$dir/db-dump.conf.dist" "$dir/db-dump.conf"
+	sed -i "s/dbname=\"\"/dbname=\"$userdbname\"/" "$dir/db-dump.conf"
+	sed -i "s/gdrivefolderid=\"\"/gdrivefolderid=\"$usergoogledrivefolderid\"/" "$dir/db-dump.conf"
+fi
+
+# Load config file
+. "$dir/db-dump.conf"
+
+# Allow config overrides per user
+if [ -f "$HOME/.config/db-dump.conf" ]; then
+	. "$HOME/.config/db-dump.conf"
+fi
+
+# Make sure $dbname and $gdrivefolderid aren't empty
+if [ -z "$dbname" ]; then
+	echo "dbname variable not set. Aborting."
+	exit 1
+fi
+
+if [ -z "$gdrivefolderid" ]; then
+	echo "gdrivefolderid variable not set. Aborting."
+	exit 1
+fi
+
+# Make sure the local directory exists
+mkdir -p "$dumpdir"
+
+# Delete local export files older than two weeks
+find "$dumpdir" -type f -name "*.sql.gz" -mtime +"$retentiondays" -print -exec rm "{}" \;
+
+# Zip up any existing export files
+find "$dumpdir" -type f -name "*.sql" -exec gzip "{}" \;
+
+# Dump the live database to a file
+file="$dbname-$(date +$dateformat).sql"
+path="$dumpdir/$file"
+
+mysqldump "$dbname" > "$path"
+
+# Upload the newly created file to Google Drive
+gdrive upload --parent "$gdrivefolderid" "$path"
