@@ -12,3 +12,6 @@ dateformat="%Y-%m-%d_%H:%M:%S"
 
 # Number of days to retain backups
 retentiondays=14
+
+# Options to pass to the mysqldump command
+mysqlopts=""
