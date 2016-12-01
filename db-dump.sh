@@ -21,12 +21,12 @@ if [ "$1" = 'config' ]; then
 
 	if [ "$overwrite" = "y" ]; then
 		echo "Generating config file..."
-		read -p "Enter Database Name: " userdbname
-		read -p "Enter Google Drive Folder ID: " usergdrivefolderid
+		read -p "Enter Database Name: " userdb_name
+		read -p "Enter Google Drive Folder ID: " usergdrive_folder_id
 
 		cp "$dir/db-dump.conf.dist" "$dir/db-dump.conf"
-		sed -i "s/dbname=\"\"/dbname=\"$userdbname\"/" "$dir/db-dump.conf"
-		sed -i "s/gdrivefolderid=\"\"/gdrivefolderid=\"$usergdrivefolderid\"/" "$dir/db-dump.conf"
+		sed -i "s/db_name=\"\"/db_name=\"$userdb_name\"/" "$dir/db-dump.conf"
+		sed -i "s/gdrive_folder_id=\"\"/gdrive_folder_id=\"$usergdrive_folder_id\"/" "$dir/db-dump.conf"
 
 		echo "Config file generated."
 	else
@@ -50,31 +50,36 @@ if [ -f "$HOME/.config/db-dump.conf" ]; then
 	. "$HOME/.config/db-dump.conf"
 fi
 
-# Make sure $dbname and $gdrivefolderid aren't empty
-if [ -z "$dbname" ]; then
-	echo >&2 "dbname variable not set. Aborting."
+# Make sure $db_name and $gdrive_folder_id aren't empty
+if [ -z "$db_name" ]; then
+	echo >&2 "db_name variable not set. Aborting."
 	exit 1
 fi
 
-if [ -z "$gdrivefolderid" ]; then
-	echo >&2 "gdrivefolderid variable not set. Aborting."
+if [ -z "$gdrive_folder_id" ]; then
+	echo >&2 "gdrive_folder_id variable not set. Aborting."
 	exit 1
 fi
 
 # Make sure the local directory exists
-mkdir -p "$dumpdir"
+mkdir -p "$dump_dir"
 
-# Delete local export files older than two weeks
-find "$dumpdir" -type f -name "*.sql.gz" -mtime +"$retentiondays" -print -exec rm "{}" \;
+# Delete local export files older than $retention_days
+find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -print -exec rm "{}" \;
 
 # Zip up any existing export files
-find "$dumpdir" -type f -name "*.sql" -print -exec gzip "{}" \;
+find "$dump_dir" -type f -name "*.sql" -print -exec gzip "{}" \;
 
 # Dump the live database to a file
-file="$dbname-$(date +$dateformat).sql"
-path="$dumpdir/$file"
+file="$db_name-$(date +$date_format).sql"
+path="$dump_dir/$file"
 
-mysqldump $mysqlopts "$dbname" > "$path"
+mysqldump $mysqlopts "$db_name" > "$path"
 
 # Upload the newly created file to Google Drive
-gdrive upload --parent "$gdrivefolderid" "$path"
+gdrive upload --parent "$gdrive_folder_id" "$path"
+
+# Delete remote export files older than $retention_days
+for file_id in $(gdrive list --no-header --query " '$gdrive_folder_id' in parents and modifiedTime <= '$(date --date="$retention_days days ago" --iso-8601="seconds")'" | awk '{print $1}'); do
+	gdrive delete "$file_id"
+done

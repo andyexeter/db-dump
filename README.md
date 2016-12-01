@@ -2,9 +2,9 @@
 
 Small script which exports a MySQL database to a file and uploads it to Google Drive.
 
-By default, the script works on a two week retention policy. That is, local backups are kept
-for up to two weeks, any backup files the script finds in the backup directory will be gzipped before
-the newest backup is exported.
+By default, the script works on a 14 day retention policy. That is, local and remote backups are kept
+for up to 14 days, any local backup files the script finds in the backup directory will be gzipped before
+the newest backup is exported and uploaded.
 
 ## Requirements
 Requires the [gdrive](https://github.com/prasmussen/gdrive) command line utility for Google Drive.
@@ -43,16 +43,18 @@ The following options must be set and do **not** have default values:
 
 | Option | Description |
 | ------ | ----------- |
-| dbname | Name of the database to export |
-| gdrivefolderid | Google Drive folder ID where files get uploaded |
+| db_name | Name of the database to export |
+| gdrive_folder_id | Google Drive folder ID where files get uploaded |
 
 The following options **do** have default values and can be tweaked as desired
 
 | Option | Description | Default |
 | ------ | ----------- | ------- |
-| dateformat | Date format for dates appended to export files | `%Y-%m-%d_%H:%M:%S` |
-| dumpdir | The local directory where export files will be stored | `/var/spool/db-dump` |
-| retentiondays | The number of days to retain local export files | `14` |
+| date_format | Date format for dates appended to export files | `%Y-%m-%d_%H:%M:%S` |
+| dump_dir | The local directory where export files will be stored | `/var/spool/db-dump` |
+| retention_days | The number of days to retain local export files | `14` |
+| delete_remote_exports | Whether to delete remote exports after $retention_days (0 for false) | `1` (true) |
+| mysql_opts | Options to pass to `mysqldump` e.g: "-uroot -p" | (None) |
 
 Options can be changed in the main `db-dump.conf` file or can be overridden on a per user basis by creating
 a config file within your home directory: `$HOME/.config/db-dump.conf`
