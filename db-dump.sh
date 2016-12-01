@@ -79,7 +79,9 @@ mysqldump $mysqlopts "$db_name" > "$path"
 # Upload the newly created file to Google Drive
 gdrive upload --parent "$gdrive_folder_id" "$path"
 
-# Delete remote export files older than $retention_days
-for file_id in $(gdrive list --no-header --query " '$gdrive_folder_id' in parents and modifiedTime <= '$(date --date="$retention_days days ago" --iso-8601="seconds")'" | awk '{print $1}'); do
-	gdrive delete "$file_id"
-done
+if [ "$delete_remote_exports" != "0" ]; then
+	# Delete remote export files older than $retention_days
+	for file_id in $(gdrive list --no-header --query " '$gdrive_folder_id' in parents and modifiedTime <= '$(date --date="$retention_days days ago" --iso-8601="seconds")'" | awk '{print $1}'); do
+		gdrive delete "$file_id"
+	done
+fi
