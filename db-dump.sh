@@ -65,10 +65,10 @@ fi
 mkdir -p "$dump_dir"
 
 # Delete local export files older than $retention_days
-find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -print -exec rm "{}" \;
+find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -exec rm "{}" \;
 
 # Zip up any existing export files
-find "$dump_dir" -type f -name "*.sql" -print -exec gzip "{}" \;
+find "$dump_dir" -type f -name "*.sql" -exec gzip "{}" \;
 
 # Dump the live database to a file
 file="$db_name-$(date +$date_format).sql"
