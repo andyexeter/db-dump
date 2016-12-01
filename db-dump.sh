@@ -77,7 +77,7 @@ path="$dump_dir/$file"
 mysqldump $mysqlopts "$db_name" > "$path"
 
 # Upload the newly created file to Google Drive
-gdrive upload --parent "$gdrive_folder_id" "$path"
+gdrive upload --no-progress --parent "$gdrive_folder_id" "$path"
 
 if [ "$delete_remote_exports" != "0" ]; then
 	# Delete remote export files older than $retention_days

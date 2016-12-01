@@ -46,7 +46,7 @@ The following options must be set and do **not** have default values:
 | db_name | Name of the database to export |
 | gdrive_folder_id | Google Drive folder ID where files get uploaded |
 
-The following options **do** have default values and can be tweaked as desired
+The following options **do** have default values and can be tweaked as desired:
 
 | Option | Description | Default |
 | ------ | ----------- | ------- |
