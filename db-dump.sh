@@ -74,7 +74,7 @@ find "$dump_dir" -type f -name "*.sql" -exec gzip "{}" \;
 file="$db_name-$(date +$date_format).sql"
 path="$dump_dir/$file"
 
-mysqldump $mysqlopts "$db_name" > "$path"
+mysqldump $mysql_opts "$db_name" > "$path"
 
 # Upload the newly created file to Google Drive
 gdrive upload --no-progress --parent "$gdrive_folder_id" "$path"
