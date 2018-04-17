@@ -50,6 +50,12 @@ if [ -f "$HOME/.config/db-dump.conf" ]; then
 	. "$HOME/.config/db-dump.conf"
 fi
 
+# If an argument is passed use that as the $db_name variable
+if [ "$1" != "" ]; then
+    db_name="$1"
+    echo "Using passed argument '$1' as db_name value"
+fi
+
 # Make sure $db_name and $gdrive_folder_id aren't empty
 if [ -z "$db_name" ]; then
 	echo >&2 "db_name variable not set. Aborting."
