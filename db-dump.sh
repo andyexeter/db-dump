@@ -37,7 +37,7 @@ if [ "$1" = 'config' ]; then
 fi
 
 # Ensure we have a conf file
-if ! [ -f "$dir/db-dump.conf"  ]; then
+if ! [ -f "$dir/db-dump.conf" ]; then
 	echo >&2 "Config file does not exist, run '$0 config' to generate it. Aborting."
 	exit 1
 fi
@@ -50,10 +50,10 @@ if [ -f "$HOME/.config/db-dump.conf" ]; then
 	. "$HOME/.config/db-dump.conf"
 fi
 
-# If an argument is passed use that as the $db_name variable
-if [ "$1" != "" ]; then
-    db_name="$1"
-    echo "Using passed argument '$1' as db_name value"
+# If an argument is passed and it's a file source it as a config file
+if [ "$1" != "" ] && [ -f "$1" ]; then
+    . "$1"
+    echo "Using '$1' as config file"
 fi
 
 # Make sure $db_name and $gdrive_folder_id aren't empty
@@ -70,24 +70,16 @@ fi
 # Make sure the local directory exists
 mkdir -p "$dump_dir"
 
-# Delete local export files older than $retention_days
-find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -exec rm "{}" \;
+# Delete exports older than $retention_days
+find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -exec rm -f "{}" \;
 
 # Zip up any existing export files
 find "$dump_dir" -type f -name "*.sql" -exec gzip "{}" \;
 
 # Dump the live database to a file
 file="$db_name-$(date +$date_format).sql"
-path="$dump_dir/$file"
 
-mysqldump $mysql_opts "$db_name" > "$path"
+mysqldump $mysql_opts "$db_name" > "$dump_dir/$file"
 
-# Upload the newly created file to Google Drive
-gdrive upload --no-progress --parent "$gdrive_folder_id" "$path"
-
-if [ "$delete_remote_exports" != "0" ]; then
-	# Delete remote export files older than $retention_days
-	for file_id in $(gdrive list --no-header --query " '$gdrive_folder_id' in parents and modifiedTime <= '$(date --date="$retention_days days ago" --iso-8601="seconds")'" | awk '{print $1}'); do
-		gdrive delete "$file_id"
-	done
-fi
+# Sync local directory with our Drive directory
+gdrive sync upload --delete-extraneous --no-progress "$dump_dir" "$gdrive_folder_id" >/dev/null 2>&1
