@@ -81,5 +81,7 @@ file="$db_name-$(date +$date_format).sql"
 
 mysqldump $mysql_opts "$db_name" > "$dump_dir/$file"
 
+echo "Syncing $dump_dir to $gdrive_folder_id"
 # Sync local directory with our Drive directory
 gdrive sync upload --delete-extraneous --no-progress "$dump_dir" "$gdrive_folder_id" >/dev/null 2>&1
+echo "Done"

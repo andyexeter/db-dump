@@ -33,8 +33,8 @@ Requires the [gdrive](https://github.com/prasmussen/gdrive) command line utility
 
 	```sh
 	$ db-dump
-	Uploading /var/spool/db-dump/mydatabase-2016-11-09_17:09:51.sql
-	Uploaded 0BwvPrE-VPdlkb7BhLGVJZUxST1z at 356.8 KB/s, total 683.5 KB
+	Syncing /var/spool/db-dump to abc123def456
+	Done
 	```
 
 ## Configuration
@@ -52,12 +52,18 @@ The following options **do** have default values and can be tweaked as desired:
 | ------ | ----------- | ------- |
 | date_format | Date format for dates appended to export files | `%Y-%m-%d_%H:%M:%S` |
 | dump_dir | The local directory where export files will be stored | `/var/spool/db-dump` |
-| retention_days | The number of days to retain local export files | `14` |
-| delete_remote_exports | Whether to delete remote exports after $retention_days (0 for false) | `1` (true) |
-| mysql_opts | Options to pass to `mysqldump` e.g: "-uroot -p" | (None) |
+| retention_days | The number of days to retain export files | `14` |
+| mysql_opts | Options to pass to `mysqldump` e.g: "-uroot" | (None) |
 
 Options can be changed in the main `db-dump.conf` file or can be overridden on a per user basis by creating
 a config file within your home directory: `$HOME/.config/db-dump.conf`
+
+Options can also be changed by passing a config file as the first argument to the script. This allows the script to be
+used with different databases and configurations:
+
+```sh
+db-dump /path/to/my/db-dump.conf
+```
 
 ## Automation
 The easiest way to automatically run the script over a given interval is to link it into one of the
