@@ -75,14 +75,15 @@ find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -exec rm -f 
 
 # Compress any existing export files
 find "$dump_dir" -type f -name "*.sql" | while read -r file; do
+    gzip "$file"
+    # Upload the .sql.gz file
+    gdrive upload --no-progress --parent "$gdrive_folder_id" "$file.gz"
+
     # Delete the .sql file from Google Drive
     file_id=$(gdrive list --no-header --query "'$gdrive_folder_id' in parents and name = '$(basename "$file")'" | head -n1 | awk '{print $1}')
     if [ "$file_id" ]; then
         gdrive delete "$file_id"
     fi
-    gzip "$file"
-    # Upload the .sql.gz file
-    gdrive upload --no-progress --parent "$gdrive_folder_id" "$file.gz"
 done
 
 # Dump the live database to a file
