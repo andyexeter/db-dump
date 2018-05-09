@@ -73,13 +73,27 @@ mkdir -p "$dump_dir"
 # Delete exports older than $retention_days
 find "$dump_dir" -type f -name "*.sql.gz" -mtime +"$retention_days" -exec rm -f "{}" \;
 
-# Zip up any existing export files
-find "$dump_dir" -type f -name "*.sql" -exec gzip "{}" \;
+# Compress any existing export files
+find "$dump_dir" -type f -name "*.sql" | while read -r file; do
+    # Delete the .sql file from Google Drive
+    file_id=$(gdrive list --no-header --query "'$gdrive_folder_id' in parents and name = '$(basename "$file")'" | head -n1 | awk '{print $1}')
+    if [ "$file_id" ]; then
+        gdrive delete "$file_id"
+    fi
+    gzip "$file"
+    # Upload the .sql.gz file
+    gdrive upload --no-progress --parent "$gdrive_folder_id" "$file.gz"
+done
 
 # Dump the live database to a file
-file="$db_name-$(date +$date_format).sql"
+dump_file="$db_name-$(date +$date_format).sql"
+path="$dump_dir/$dump_file"
+mysqldump $mysql_opts "$db_name" > "$path"
 
-mysqldump $mysql_opts "$db_name" > "$dump_dir/$file"
+# Upload the newly created file to Google Drive
+gdrive upload --no-progress --parent "$gdrive_folder_id" "$path"
 
-# Sync local directory with our Drive directory
-gdrive sync upload --delete-extraneous --no-progress "$dump_dir" "$gdrive_folder_id"
+# Delete remote export files older than $retention_days
+for file_id in $(gdrive list --no-header --query "'$gdrive_folder_id' in parents and modifiedTime <= '$(date --date="$retention_days days ago" --iso-8601="seconds")'" | awk '{print $1}'); do
+    gdrive delete "$file_id"
+done

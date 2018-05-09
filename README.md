@@ -33,7 +33,8 @@ Requires the [gdrive](https://github.com/prasmussen/gdrive) command line utility
 
 	```sh
 	$ db-dump
-	Syncing /var/spool/db-dump to abc123def456
+	Uploading /var/spool/db-dump/mydatabase-2016-11-09_17:09:51.sql
+	Uploaded 0BwvPrE-VPdlkb7BhLGVJZUxST1z at 356.8 KB/s, total 683.5 KB
 	Done
 	```
 
